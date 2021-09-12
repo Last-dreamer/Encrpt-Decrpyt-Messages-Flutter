@@ -306,25 +306,32 @@ class _MainEncryptionState extends State<MainEncryption> {
                     onTap: () async {
 
 
+                      var pkey;
+                      var len;
                       if(_currentSelectedValue !=null){
                         pubKey  = await Databasehelper.instance.getPubKey(_currentSelectedValue!);
-                        print("pubKey ${await pubKey}");
+                         len = pubKey.toString().length;
+                        pkey = pubKey.toString().substring(1, len-1).length;
+                        print("pubKey ${ pubKey.toString().substring(1, len-1).length}");
+                        // print("pubKey ${ pubKey}");
                       }
                       try {
-                        // var check;
-                        // allData.forEach((e) {
-                        //   check = e['publicKey'];
-                        //   print("check ${check}");
-                        //   // print(" pubKey ${pubKey.toString().substring(35, 540)}");
-                        // });
-                        // print('pubKey $pubKey');
-                        // encrypted = await OpenPGP.encrypt(
-                        //   enc,
-                        //   check
-                        // );
-                        // setState(() {
-                        //   _encrypted = encrypted;
-                        // });
+                        var check;
+                        allData.forEach((e) {
+                          check = e['publicKey'];
+                          print("check ${check}");
+                          // print("check ${check}");
+                          print("check ${check == pubKey.toString().substring(1, len)}");
+                          // print(" pubKey ${pubKey.toString().substring(35, 540)}");
+                        });
+
+                        encrypted = await OpenPGP.encrypt(
+                          enc,
+                          check
+                        );
+                        setState(() {
+                          _encrypted = encrypted;
+                        });
                         print('something is working');
                         // UserPrefrences.setEnc(encrypted);
                       } catch (e) {
@@ -456,3 +463,5 @@ class _MainEncryptionState extends State<MainEncryption> {
     );
   }
 }
+
+

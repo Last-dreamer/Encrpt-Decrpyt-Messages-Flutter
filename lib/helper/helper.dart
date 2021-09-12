@@ -73,8 +73,11 @@ class Databasehelper {
   //
   Future getPubKey(String username) async {
     Database db = await instance.databse;
-      var result =  await db.rawQuery("SELECT $publicKey  FROM $table where $userName = '$username';");
-    // return await db.query(table, where: '$userName = ? ', whereArgs: [username]);
+     var  result;
+     await Future.delayed(const Duration(seconds: 1), (){
+      result =  db.rawQuery("SELECT *  FROM $table where $userName = '$username';");
+    });
+    // result = await db.query(table, where: '$userName = ? ', whereArgs: [username]);
 
     return  result;
   }
