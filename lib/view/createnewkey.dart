@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:openpgp/openpgp.dart';
+import 'package:rsa_algoriyhm/helper/helper.dart';
 import 'package:rsa_algoriyhm/shareprefences/shared_prefrence.dart';
 import 'package:rsa_algoriyhm/view/creatingnewkeypair.dart';
 import 'package:rsa_algoriyhm/view/repeatedeidget/purplebutton.dart';
@@ -38,10 +39,11 @@ class _CreateNewKeyState extends State<CreateNewKey> {
         actions: [
           ElevatedButton(
               onPressed: () {
-                UserPrefrences.getUser();
-                UserPrefrences.getBits();
-                UserPrefrences.getValidation();
-                UserPrefrences.getPassphrase();
+                print("checking...  ${username} $bitsValues $expiryDatePicker  $passphrase ");
+                // UserPrefrences.getUser();
+                // UserPrefrences.getBits();
+                // UserPrefrences.getValidation();
+                // UserPrefrences.getPassphrase();
               },
               child: Text('getdata'))
         ],
@@ -70,10 +72,10 @@ class _CreateNewKeyState extends State<CreateNewKey> {
                       border: Border.all(
                           color: Color(0xff000000).withOpacity(0.12))),
                   child: TextField(
-                    onSubmitted: (va) {
+                    onChanged: (va) {
                       setState(() {
                         username = va;
-                        UserPrefrences.setUserName(username);
+                        // UserPrefrences.setUserName(username);
                         print(username);
                       });
                     },
@@ -264,7 +266,7 @@ class _CreateNewKeyState extends State<CreateNewKey> {
                                     final datee = formatDate(
                                         date, [yyyy, '-', mm, '-', dd]);
                                     expiryDatePicker = datee;
-                                    UserPrefrences.setValidation(datee);
+                                    // UserPrefrences.setValidation(datee);
                                     print(expiryDatePicker);
                                   });
                                 },
@@ -302,7 +304,7 @@ class _CreateNewKeyState extends State<CreateNewKey> {
                           onSubmitted: (val) {
                             setState(() {
                               passphrase = val;
-                              UserPrefrences.setPassphrase(passphrase!);
+                              // UserPrefrences.setPassphrase(passphrase!);
                               print(passphrase);
                             });
                           },
@@ -333,19 +335,29 @@ class _CreateNewKeyState extends State<CreateNewKey> {
                 PassphraseContainer2(),
                 InkWell(
                   onTap: () async {
-                    UserPrefrences.setUserName(username);
-                    UserPrefrences.setBits(int.parse(bitsValues.toString()));
-                    UserPrefrences.setValidation(expiryDatePicker);
+                    // UserPrefrences.setUserName(username);
+                    // UserPrefrences.setBits(int.parse(bitsValues.toString()));
+                    // UserPrefrences.setValidation(expiryDatePicker);
 
-                    var keyOptions = KeyOptions()..rsaBits = 2048;
+                    var keyOptions = KeyOptions()..rsaBits = int.parse(bitsValues.toString());
                     var keyPair = await OpenPGP.generate(
                         options: Options()
                           ..passphrase = passphrase
                           ..keyOptions = keyOptions);
 
-                    UserPrefrences.setPubK(keyPair.publicKey);
-                    UserPrefrences.setPrivK(keyPair.privateKey);
+                    // UserPrefrences.setPubK(keyPair.publicKey);
+                    // UserPrefrences.setPrivK(keyPair.privateKey);
                     // UserPrefrences.setPassphrase()
+
+                    Map<String, dynamic> row = {
+                      Databasehelper.userName: username,
+                      Databasehelper.publicKey: keyPair.publicKey,
+                      Databasehelper.privateKey: keyPair.privateKey,
+                      Databasehelper.xdate: expiryDatePicker,
+                      Databasehelper.passphrase: passphrase,
+                    };
+                    var db =  Databasehelper.instance.insert(row);
+                    print('success ${db}');
 
                     Navigator.push(
                         context,

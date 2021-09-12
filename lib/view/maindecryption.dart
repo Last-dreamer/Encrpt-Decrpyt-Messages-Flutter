@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:openpgp/openpgp.dart';
+import 'package:rsa_algoriyhm/helper/helper.dart';
 import 'package:rsa_algoriyhm/shareprefences/shared_prefrence.dart';
 import 'package:rsa_algoriyhm/view/mainencryption.dart';
 
@@ -15,25 +16,48 @@ class MainDecryption extends StatefulWidget {
   _MainDecryptionState createState() => _MainDecryptionState();
 }
 
+
+String passPhrase = '';
+TextEditingController ciperTextController = TextEditingController();
+TextEditingController decController = TextEditingController();
+TextEditingController passController = TextEditingController();
+String _decrypted = '';
+
 class _MainDecryptionState extends State<MainDecryption> {
   String? _currentSelectedValue;
 
-  String _decrypted = "";
-  String dec = UserPrefrences.getEnc();
-  var _currencies = [
-    "value 0",
-    "value 1",
-    "value 2",
-    "value 3",
-    "value 4",
-    "value 5",
-    "value 6",
-    "value 7"
-  ];
+
+  String dec = '';
+
+  var db;
+  List<String>? userNameFromdb = List.empty(growable: true);
+  List allData = List.empty(growable: true);
+
+  List<String>? _currencies = List.empty(growable: true);
+  var pubKey;
+
+  Future getData() async {
+    userNameFromdb = [];
+
+    allData = [];
+    db =  await Databasehelper.instance.queryall();
+    db.forEach((element) {
+      // _currencies =  element['username'];
+      userNameFromdb!.add(element['username']);
+      allData.add(element);
+      // print("rows  ${element['username'].toString()}");
+    });
+
+    _currencies = userNameFromdb;
+    print("it's all $_currencies");
+  }
+
 
   @override
   void initState() {
+    getData();
     super.initState();
+
   }
 
   @override
@@ -130,6 +154,7 @@ class _MainDecryptionState extends State<MainDecryption> {
                     shape: BoxShape.rectangle,
                   ),
                   child: TextField(
+                    controller: ciperTextController,
                      maxLines: 100,
                       onChanged: (value) {
                         dec = value;
@@ -220,7 +245,7 @@ class _MainDecryptionState extends State<MainDecryption> {
                                       state.didChange(value1);
                                     });
                                   },
-                                  items: _currencies.map((String value) {
+                                  items: _currencies!.map((String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,
                                       child: Text(
@@ -266,13 +291,22 @@ class _MainDecryptionState extends State<MainDecryption> {
               ),
               child: GestureDetector(
                 onTap: () async {
+                  // var pass = passPhrase == UserPrefrences.getPassphrase() ? 'success': 'failed';
+                  // print("its pass $pass");
+                  // print("its pass ${UserPrefrences.getPrivK()}");
 
-                  print("its dec $dec");
-                  print("its pass ${UserPrefrences.getPrivK()}");
+                  var check;
+                  var pass;
+                  allData.forEach((e) {
+                    check = e['privateKey'];
+                    pass = e['passphrase'];
+                    print("check ${check}");
+                    // print(" pubKey ${pubKey.toString().substring(35, 540)}");
+                  });
                   var decrypted = await OpenPGP.decrypt(
                     dec,
-                    UserPrefrences.getPrivK(),
-                    passphrase,
+                      check,
+                     pass,
                   );
                   print(' its decccc${decrypted}');
                   setState(() {
@@ -303,7 +337,12 @@ class _MainDecryptionState extends State<MainDecryption> {
                     borderRadius: BorderRadius.circular(5),
                     shape: BoxShape.rectangle,
                   ),
-                  child: TextField(
+                  child: TextFormField(
+                    controller: decController,
+                      onChanged: (newValue) {
+                        _decrypted = newValue;
+                      },
+                      maxLines: 100,
                       decoration: InputDecoration(border: InputBorder.none)),
                 ),
                 Positioned(
@@ -313,7 +352,7 @@ class _MainDecryptionState extends State<MainDecryption> {
                       padding: EdgeInsets.only(left: 1.w, right: 1.w),
                       // color: Color(0xffF5F5F5),
                       child: Text(
-                        'Plaintext ' + '\n' + _decrypted,
+                        'Plaintext ' + '\n' + _decrypted!,
                         style: TextStyle(color: Colors.black, fontSize: 12.sp),
                       ),
                     )),
@@ -377,13 +416,30 @@ class _MainDecryptionState extends State<MainDecryption> {
                     ),
                     borderRadius: BorderRadius.circular(5),
                   ),
-                  child: Center(
-                    child: Text(
-                      'CLEAR ALL',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Color(0xff000000).withOpacity(0.38),
-                        fontWeight: FontWeight.w400,
+                  child: GestureDetector(
+                    onTap: () {
+
+                    },
+                    child: GestureDetector(
+                      onTap: () {
+                       setState(() {
+                         passPhrase = '';
+                         passController.clear();
+                         decController.clear();
+                         ciperTextController.clear();
+                         dec = '';
+                         _decrypted = '';
+                       });
+                      },
+                      child: Center(
+                        child: Text(
+                          'CLEAR ALL',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Color(0xff000000).withOpacity(0.38),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -419,6 +475,10 @@ class Passphrase1 extends StatelessWidget {
             shape: BoxShape.rectangle,
           ),
           child: TextField(
+            onChanged: (value) {
+              passPhrase = value;
+            },
+              controller: passController,
               decoration: InputDecoration(
                   hintStyle: TextStyle(color: Colors.black, fontSize: 12.sp),
                   hintText: '***********',

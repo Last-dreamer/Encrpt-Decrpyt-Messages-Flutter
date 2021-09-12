@@ -64,7 +64,7 @@ class MyHomePage extends StatelessWidget {
                       width: 0.7)),
               child: GestureDetector(
                 onTap: () {
-                print('woeking');
+                print('working');
                 Navigator.push(context, MaterialPageRoute(builder: (context) => MainEncryption(),));
                 },
                 child: Text(

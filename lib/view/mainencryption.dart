@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:openpgp/openpgp.dart';
+import 'package:rsa_algoriyhm/helper/helper.dart';
 import 'package:rsa_algoriyhm/shareprefences/shared_prefrence.dart';
 import 'package:rsa_algoriyhm/view/maindecryption.dart';
 import 'package:rsa_algoriyhm/view/repeatedeidget/appbarcontainer.dart';
@@ -19,10 +20,36 @@ class _MainEncryptionState extends State<MainEncryption> {
   KeyPair? _defaultKeyPair;
   var encrypted;
 
+  var db;
+  List<String>? userNameFromdb = List.empty(growable: true);
+  List allData = List.empty(growable: true);
+
+  List<String>? _currencies = List.empty(growable: true);
+  var pubKey;
+
+  
   @override
   void initState() {
+    // _currencies = userNameFromdb;
     super.initState();
+    getData();
     // initKeyPair();
+  }
+
+  Future getData() async {
+    userNameFromdb = [];
+
+    allData = [];
+    db =  await Databasehelper.instance.queryall();
+    db.forEach((element) {
+      // _currencies =  element['username'];
+      userNameFromdb!.add(element['username']);
+      allData.add(element);
+      // print("rows  ${element['username'].toString()}");
+    });
+
+    _currencies = userNameFromdb;
+    print("it's all $_currencies");
   }
 
   // Future<void> initKeyPair() async {
@@ -37,22 +64,12 @@ class _MainEncryptionState extends State<MainEncryption> {
   //   });
   // }
 
-  List<bool> _selections = List.generate(3, (_) => false);
   String? _currentSelectedValue;
   String enc = '';
 
   String _encrypted = "";
 
 
-  var _currencies = [
-   "value 1",
-    "value 2",
-    "value 3",
-    "value 4",
-    "value 5",
-    "value 6",
-    "value 7"
-  ];
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
@@ -215,40 +232,47 @@ class _MainEncryptionState extends State<MainEncryption> {
                                 border: InputBorder.none,
                               ),
                               // isEmpty: _currentSelectedValue == '',
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  hint: Text(
-                                    'Select...',
-                                    style: TextStyle(
-                                        color: Color(0xff000000),
-                                        fontSize: 12.sp),
-                                  ),
-                                  value: _currentSelectedValue,
-                                  isDense: true,
-                                  // onChanged: (String newValue) {
-                                  //   setState(() {
-                                  //     _currentSelectedValue = newValue;
-                                  //     state.didChange(newValue);
-                                  //   });
-                                  // },
-                                  onChanged: (value1) {
-                                    setState(() {
-                                      _currentSelectedValue = value1;
-                                      state.didChange(value1);
-                                    });
-                                  },
-                                  items: _currencies.map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(
-                                        value,
-                                        style:
-                                            TextStyle(color: Color(0xff000000)),
+                              child: FutureBuilder(
+                                future: getData(),
+                                builder: (context, snapshot) {
+
+                                    return DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        hint: Text(
+                                          'Select...',
+                                          style: TextStyle(
+                                              color: Color(0xff000000),
+                                              fontSize: 12.sp),
+                                        ),
+                                        value: _currentSelectedValue,
+                                        isDense: true,
+                                        // onChanged: (String newValue) {
+                                        //   setState(() {
+                                        //     _currentSelectedValue = newValue;
+                                        //     state.didChange(newValue);
+                                        //   });
+                                        // },
+                                        onChanged: (value1) {
+                                          setState(() {
+                                            _currentSelectedValue = value1;
+                                            state.didChange(value1);
+                                          });
+                                        },
+                                        items: _currencies!.map((value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value.toString(),
+                                            child: Text(
+                                              value.toString(),
+                                              style:
+                                              TextStyle(color: Color(0xff000000)),
+                                            ),
+                                          );
+                                        }).toList(),
                                       ),
                                     );
-                                  }).toList(),
-                                ),
-                              ),
+
+                                },
+                              )
                             );
                           },
                         )),
@@ -280,17 +304,31 @@ class _MainEncryptionState extends State<MainEncryption> {
                   child: Center(
                       child: GestureDetector(
                     onTap: () async {
+
+
+                      if(_currentSelectedValue !=null){
+                        pubKey  = await Databasehelper.instance.getPubKey(_currentSelectedValue!);
+                        print("pubKey ${await pubKey}");
+                      }
                       try {
-                        encrypted = await OpenPGP.encrypt(
-                          enc,
-                         UserPrefrences.getPubK()
-                        );
-                        setState(() {
-                          _encrypted = encrypted;
-                        });
-                        UserPrefrences.setEnc(encrypted);
+                        // var check;
+                        // allData.forEach((e) {
+                        //   check = e['publicKey'];
+                        //   print("check ${check}");
+                        //   // print(" pubKey ${pubKey.toString().substring(35, 540)}");
+                        // });
+                        // print('pubKey $pubKey');
+                        // encrypted = await OpenPGP.encrypt(
+                        //   enc,
+                        //   check
+                        // );
+                        // setState(() {
+                        //   _encrypted = encrypted;
+                        // });
+                        print('something is working');
+                        // UserPrefrences.setEnc(encrypted);
                       } catch (e) {
-                        print(e);
+                        print("it's error $e");
                       }
                     },
                     child: Text(
