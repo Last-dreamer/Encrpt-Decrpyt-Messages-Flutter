@@ -317,14 +317,18 @@ class _MainEncryptionState extends State<MainEncryption> {
                       }
                       try {
                         var check;
+
+
                         allData.forEach((e) {
-                          check = e['publicKey'];
-                          print("check ${check}");
+                          if(e['username'] == _currentSelectedValue){
+                            check = e['publicKey'];
+                            print("check  123 ${check}");
+                          }
+
                           // print("check ${check}");
                           print("check ${check == pubKey.toString().substring(1, len)}");
                           // print(" pubKey ${pubKey.toString().substring(35, 540)}");
                         });
-
                         encrypted = await OpenPGP.encrypt(
                           enc,
                           check

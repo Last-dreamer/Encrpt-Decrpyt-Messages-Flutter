@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:rsa_algoriyhm/shareprefences/shared_prefrence.dart';
 import 'package:rsa_algoriyhm/view/publickeyqrcode.dart';
 import 'package:rsa_algoriyhm/view/repeatedeidget/appbarcontainer.dart';
 import 'package:rsa_algoriyhm/view/repeatedeidget/purplebutton.dart';
+import 'package:share/share.dart';
 import 'package:sizer/sizer.dart';
 
 // import 'mainencryption.dart';
@@ -15,9 +21,37 @@ class KeyPairCreated extends StatefulWidget {
 }
 
 class _KeyPairCreatedState extends State<KeyPairCreated> {
+  Future getFilePath() async {
+    // Directory? dir = await getExternalStorageDirectory();
+    // print(dir!.path);
+    String? filePath;
+    final status = await Permission.storage.request();
+    if (status == PermissionStatus.granted) {
+      Directory? appDocumentsDirectory =
+          await getExternalStorageDirectory(); // 1
+
+      String appDocumentsPath = appDocumentsDirectory!.path; // 2
+
+      filePath = '$appDocumentsPath/demoTextFile2.js'; //
+    } else {
+      print('denied');
+    }
+
+    return filePath;
+  }
+
+  void saveFile() async {
+    File file = File(await getFilePath()); // 1
+    final restlt = await file.writeAsString(UserPrefrences.getPubK()); // 2
+    print(restlt);
+  }
+
+  var _key = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _key,
       endDrawer: AppBarContainer(),
       appBar: AppBar(
         backgroundColor: Color(0xFF6200EE),
@@ -49,16 +83,29 @@ class _KeyPairCreatedState extends State<KeyPairCreated> {
             ),
             Column(
               children: [
-                PurpleButton(
-                  tittle: 'BACKUP KEY PAIR',
-                  icon: Icons.download,
+                GestureDetector(
+                  onTap: () {
+                    saveFile();
+                    print('saved success');
+                    _key.currentState!.showSnackBar(
+                        SnackBar(content: Text('backup successfully...')));
+                  },
+                  child: PurpleButton(
+                    tittle: 'BACKUP KEY PAIR',
+                    icon: Icons.download,
+                  ),
                 ),
                 SizedBox(
                   height: 5.h,
                 ),
-                PurpleButton(
-                  tittle: 'SHARE PUBLIC KEY',
-                  icon: Icons.share,
+                GestureDetector(
+                  onTap: () {
+                    Share.share(UserPrefrences.getPubK());
+                  },
+                  child: PurpleButton(
+                    tittle: 'SHARE PUBLIC KEY',
+                    icon: Icons.share,
+                  ),
                 ),
                 SizedBox(
                   height: 5.h,

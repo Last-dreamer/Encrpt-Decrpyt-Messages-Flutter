@@ -39,8 +39,11 @@ class Databasehelper {
   _initDatabase() async {
     Directory documentdirecoty = await getApplicationDocumentsDirectory();
     String path = join(documentdirecoty.path, _databasename);
-    return await openDatabase(path,
-        version: _databaseversion, onCreate: _onCreate);
+    return await openDatabase(
+      path,
+      version: _databaseversion,
+      onCreate: _onCreate,
+    );
   }
 
   // create a database since it doesn't exist
@@ -61,32 +64,60 @@ class Databasehelper {
   // functions to insert data
   Future<int> insert(Map<String, dynamic> row) async {
     Database db = await instance.databse;
-    return await db.insert(table, row);
+    Directory? appDocumentsDirectory = await getExternalStorageDirectory();
+    String appDocumentsPath = appDocumentsDirectory!.path;
+
+    final database = await db.insert(table, row);
+    String filePath = '$appDocumentsPath/$table.db'; //
+    print(filePath);
+    return database;
   }
 
   // function to query all the rows
   Future<List<Map<String, dynamic>>> queryall() async {
     Database db = await instance.databse;
-    return await db.query(table);
+
+    final result = await db.query(table);
+    result.forEach((element) {
+      print(element);
+    });
+
+    return result;
   }
 
   //
   Future getPubKey(String username) async {
     Database db = await instance.databse;
-     var  result;
-     await Future.delayed(const Duration(seconds: 1), (){
-      result =  db.rawQuery("SELECT *  FROM $table where $userName = '$username';");
+    var result;
+    await Future.delayed(const Duration(seconds: 1), () {
+      result =
+          db.rawQuery("SELECT *  FROM $table where $userName = '$username';");
     });
     // result = await db.query(table, where: '$userName = ? ', whereArgs: [username]);
 
-    return  result;
+    return result;
   }
-
 
   // function to delete some data
   Future<int> deletedata(int id) async {
     Database db = await instance.databse;
     var res = await db.delete(table, where: "id = ?", whereArgs: [id]);
     return res;
+  }
+
+  query() async {
+    // get a reference to the database
+
+    // get all rows
+
+    List<Map> result = await _database!.query(table);
+    if (result == null) {
+      print('data not exisit');
+    } else
+      // print the results
+      result.forEach((row) => print(row));
+    // {_id: 1, name: Bob, age: 23}
+    // {_id: 2, name: Mary, age: 32}
+    // {_id: 3, name: Susan, age: 12}
   }
 }

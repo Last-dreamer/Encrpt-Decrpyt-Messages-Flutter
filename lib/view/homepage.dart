@@ -1,14 +1,46 @@
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:date_format/date_format.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rsa_algoriyhm/encriptionScreen.dart';
 import 'package:rsa_algoriyhm/view/createnewkey.dart';
 import 'package:rsa_algoriyhm/view/mainencryption.dart';
 import 'package:rsa_algoriyhm/view/repeatedeidget/purplebutton.dart';
 import 'package:sizer/sizer.dart';
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+class MyHomePage extends StatefulWidget {
+  // void function(String str1, String char) {
+
+  //   final s = str1.characters.where((e) => e.contains(char));
+  //   print(s.length);
+  // }
+
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  File? file;
+  String? text;
+  Future importFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: false,
+    );
+    if (result != null) {
+      setState(() {
+        file = File(result.files.single.path);
+        print(file);
+      });
+      final data = await rootBundle.loadString('${file!.uri}');
+      setState(() {
+        print('Dataaaaaaa  $data');
+        text = data;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +96,14 @@ class MyHomePage extends StatelessWidget {
                       width: 0.7)),
               child: GestureDetector(
                 onTap: () {
-                print('working');
-                Navigator.push(context, MaterialPageRoute(builder: (context) => MainEncryption(),));
+                  print('working');
+                  importFile();
+
+                  // Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //       builder: (context) => MainEncryption(),
+                  //     ));
                 },
                 child: Text(
                   "IMPORT",

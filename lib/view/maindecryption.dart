@@ -222,42 +222,47 @@ class _MainDecryptionState extends State<MainDecryption> {
                                 border: InputBorder.none,
                               ),
                               // isEmpty: _currentSelectedValue == '',
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  hint: Text(
-                                    'Default',
-                                    style: TextStyle(
-                                        color: Color(0xff000000),
-                                        fontSize: 12.sp),
-                                  ),
-
-                                  value: _currentSelectedValue,
-                                  isDense: true,
-                                  // onChanged: (String newValue) {
-                                  //   setState(() {
-                                  //     _currentSelectedValue = newValue;
-                                  //     state.didChange(newValue);
-                                  //   });
-                                  // },
-                                  onChanged: (value1) {
-                                    setState(() {
-                                      _currentSelectedValue = value1;
-                                      state.didChange(value1);
-                                    });
-                                  },
-                                  items: _currencies!.map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(
-                                        value,
+                              child: FutureBuilder(
+                                future: getData(),
+                                builder: (context, snapshot) {
+                                  return DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      hint: Text(
+                                        'Default',
                                         style: TextStyle(
-                                            color: Color(0xff000000)
-                                                .withOpacity(0.74)),
+                                            color: Color(0xff000000),
+                                            fontSize: 12.sp),
                                       ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
+
+                                      value: _currentSelectedValue,
+                                      isDense: true,
+                                      // onChanged: (String newValue) {
+                                      //   setState(() {
+                                      //     _currentSelectedValue = newValue;
+                                      //     state.didChange(newValue);
+                                      //   });
+                                      // },
+                                      onChanged: (value1) {
+                                        setState(() {
+                                          _currentSelectedValue = value1;
+                                          state.didChange(value1);
+                                        });
+                                      },
+                                      items: _currencies!.map((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            style: TextStyle(
+                                                color: Color(0xff000000)
+                                                    .withOpacity(0.74)),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  );
+                                },
+                              )
                             );
                           },
                         )),
@@ -298,21 +303,29 @@ class _MainDecryptionState extends State<MainDecryption> {
                   var check;
                   var pass;
                   allData.forEach((e) {
-                    check = e['privateKey'];
-                    pass = e['passphrase'];
-                    print("check ${check}");
+                    if(e['username'] == _currentSelectedValue){
+                      check = e['privateKey'];
+                      pass = e['passphrase'];
+                      print("check  123 ${check}");
+                      print("passphrass  123 ${pass}");
+                    }
+
                     // print(" pubKey ${pubKey.toString().substring(35, 540)}");
                   });
-                  var decrypted = await OpenPGP.decrypt(
-                    dec,
+                  print('passPhrase ${passPhrase}');
+                  if(passPhrase == pass){
+                    print('getting here');
+                    var decrypted = await OpenPGP.decrypt(
+                      dec,
                       check,
-                     pass,
-                  );
-                  print(' its decccc${decrypted}');
-                  setState(() {
-                    _decrypted = decrypted;
-                  });
-                  // print("its dec $dec");
+                      pass,
+                    );
+                    print(' its decccc ${decrypted}');
+                    setState(() {
+                      _decrypted = decrypted;
+                    });
+                  }
+                  print("its dec $dec");
                 },
                 child: Center(
                     child: Text(
@@ -352,7 +365,7 @@ class _MainDecryptionState extends State<MainDecryption> {
                       padding: EdgeInsets.only(left: 1.w, right: 1.w),
                       // color: Color(0xffF5F5F5),
                       child: Text(
-                        'Plaintext ' + '\n' + _decrypted!,
+                        'Plaintext ' + '\n' + _decrypted,
                         style: TextStyle(color: Colors.black, fontSize: 12.sp),
                       ),
                     )),

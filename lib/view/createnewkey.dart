@@ -21,12 +21,13 @@ class _CreateNewKeyState extends State<CreateNewKey> {
   String expiryDatePicker = '';
   String username = '';
   String? passphrase;
+  Databasehelper databasehelper = Databasehelper.instance;
 
   @override
   void initState() {
     // UserPrefrences.getBits();
     // UserPrefrences.getUser();
-
+    databasehelper;
     // UserPrefrences.getValidation();
     super.initState();
   }
@@ -39,7 +40,10 @@ class _CreateNewKeyState extends State<CreateNewKey> {
         actions: [
           ElevatedButton(
               onPressed: () {
-                print("checking...  ${username} $bitsValues $expiryDatePicker  $passphrase ");
+                // print(
+                //     "checking...  ${username} $bitsValues $expiryDatePicker  $passphrase ");
+                databasehelper.queryall();
+                // databasehelper.query();
                 // UserPrefrences.getUser();
                 // UserPrefrences.getBits();
                 // UserPrefrences.getValidation();
@@ -339,13 +343,14 @@ class _CreateNewKeyState extends State<CreateNewKey> {
                     // UserPrefrences.setBits(int.parse(bitsValues.toString()));
                     // UserPrefrences.setValidation(expiryDatePicker);
 
-                    var keyOptions = KeyOptions()..rsaBits = int.parse(bitsValues.toString());
+                    var keyOptions = KeyOptions()
+                      ..rsaBits = int.parse(bitsValues.toString());
                     var keyPair = await OpenPGP.generate(
                         options: Options()
                           ..passphrase = passphrase
                           ..keyOptions = keyOptions);
 
-                    // UserPrefrences.setPubK(keyPair.publicKey);
+                    UserPrefrences.setPubK(keyPair.publicKey);
                     // UserPrefrences.setPrivK(keyPair.privateKey);
                     // UserPrefrences.setPassphrase()
 
@@ -356,7 +361,7 @@ class _CreateNewKeyState extends State<CreateNewKey> {
                       Databasehelper.xdate: expiryDatePicker,
                       Databasehelper.passphrase: passphrase,
                     };
-                    var db =  Databasehelper.instance.insert(row);
+                    var db = Databasehelper.instance.insert(row);
                     print('success ${db}');
 
                     Navigator.push(
