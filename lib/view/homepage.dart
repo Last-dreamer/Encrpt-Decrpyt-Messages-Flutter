@@ -26,12 +26,17 @@ class _MyHomePageState extends State<MyHomePage> {
   File? file;
   String? text;
   Future importFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
+    // final result = await FilePicker.platform.pickFiles(
+    //   allowMultiple: false,
+    // );
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'pdf', 'txt'],
     );
+
     if (result != null) {
       setState(() {
-        file = File(result.files.single.path);
+        file = File(result.files.first.path);
         print(file);
       });
       final data = await rootBundle.loadString('${file!.uri}');
