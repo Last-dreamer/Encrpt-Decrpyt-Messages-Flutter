@@ -27,28 +27,12 @@ class _KeyPairCreatedState extends State<KeyPairCreated> {
     String filePath = '';
     final status = await Permission.storage.request();
     if (status == PermissionStatus.granted) {
-      // Directory? appDocumentsDirectory =
-      //     await getExternalStorageDirectory(); // 1
-      //
-      // String appDocumentsPath = appDocumentsDirectory!.path; // 2
-      //
-      // filePath = '$appDocumentsPath/demoTextFile2.txt'; //
-      Directory? directory;
-         directory = await getExternalStorageDirectory();
+      Directory? appDocumentsDirectory =
+          await getApplicationSupportDirectory(); // 1
 
-          print(directory);
-          List<String> paths = directory!.path.split("/");
-          for (int x = 1; x < paths.length; x++) {
-            String folder = paths[x];
-            if (folder != "Android") {
-              filePath += "/" + folder;
-            } else {
-              break;
-            }
-          }
-      filePath = filePath + "/RPSApp";
-          directory = Directory(filePath);
+      String appDocumentsPath = appDocumentsDirectory!.path; // 2
 
+      filePath = '$appDocumentsPath/demoTextFile4.txt'; //
     } else {
       print('denied');
     }
